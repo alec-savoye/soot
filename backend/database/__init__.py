@@ -28,3 +28,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Export schema models
+from .schema import Submission

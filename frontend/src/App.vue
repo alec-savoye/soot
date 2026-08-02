@@ -3,8 +3,11 @@
         <div class="header">
             <h1>🔥 Heat Map</h1>
             <div class="controls">
-                <button @click="showLogin = !showLogin" v-if="!showLogin">
+                <button @click="showLogin = !showLogin" v-if="!showLogin && !clientToken">
                     🔐 Login
+                </button>
+                <button v-if="clientToken" @click="handleAddLocation" class="btn-primary">
+                    📍 Add my location
                 </button>
                 <div v-if="showLogin" class="login-form">
                     <div class="form-group">
@@ -43,11 +46,11 @@
 </template>
 
 <script>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import 'leaflet.heatlayer'
-import { fetchSubmissions, submitVibe } from '../api/client.js'
+import 'leaflet.heat'
+import { fetchSubmissions, submitVibe } from './api/client.js'
 import Admin from './Admin.vue'
 
 export default {
@@ -85,7 +88,8 @@ export default {
 
         const loadSubmissions = async () => {
             try {
-                const data = await fetchSubmissions()
+                const result = await fetchSubmissions()
+                const data = result.data || []
                 
                 markers.value.forEach(m => {
                     if (m.layer) map.value.removeLayer(m.layer)
@@ -128,17 +132,13 @@ export default {
             }
         }
 
-        const handleLogin = async () => {
+        const handleLogin = () => {
             if (!token.value.trim()) return
 
-            try {
-                const response = await submitVibe(token.value.trim())
-                clientToken.value = response.token
-                showLogin.value = false
-                token.value = ''
-            } catch (error) {
-                alert('Error: ' + (error.message || 'Failed to login'))
-            }
+            // Token-based auth is stateless: just remember the token locally.
+            clientToken.value = token.value.trim()
+            showLogin.value = false
+            token.value = ''
         }
 
         const handleAddLocation = async () => {
@@ -209,7 +209,8 @@ export default {
             token,
             clientToken,
             handleLogin,
-            handleAddLocation
+            handleAddLocation,
+            submitVibeData
         }
     }
 }

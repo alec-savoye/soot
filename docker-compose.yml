@@ -1,32 +1,21 @@
-version: '3.8'
-
 services:
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
     ports:
-      - "3000:3000"
-    volumes:
-      # Mount frontend build output - allows hot reload during development
-      - ./frontend/dist:/app/frontend/dist
-      # Mount data directory for backend data access
-      - ./backend/data:/data
+      - "5174:5174"
     depends_on:
       - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
 
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
     ports:
       - "8000:8000"
     volumes:
-      # Mount PostgreSQL data directory for persistence (bind mount, not Docker volume)
-      - ./backend/data:/app/backend/data
-      # Mount backend source code - allows hot reload during development
-      - ./backend:/app/backend
-    environment:
-      - DATABASE_URL=sqlite:////app/backend/data/heat_map.db
-
-# No named volumes - all data is in bind-mounted directories
+      # SQLite DB persisted here (path hardcoded in backend/database/__init__.py)
+      - ./data:/app/backend/data

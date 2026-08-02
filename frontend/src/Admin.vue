@@ -12,7 +12,7 @@
                     <input :value="generatedToken" readonly class="token-input" />
                     <button @click="copyToken" class="btn-secondary">Copy</button>
                 </div>
-                <div v-if="message" :class="['message', message.type]" v-html="message"></div>
+                <div v-if="message.text" :class="['message', message.type]">{{ message.text }}</div>
             </div>
 
             <div class="card">
@@ -68,7 +68,11 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { fetchAllTokens, generateToken, deleteToken } from './api/admin.js'
+import {
+    fetchAllTokens,
+    generateToken as apiGenerateToken,
+    deleteToken as apiDeleteToken
+} from './api/client.js'
 
 export default {
     name: 'AdminPanel',
@@ -80,7 +84,7 @@ export default {
 
         const generateToken = async () => {
             try {
-                const data = await generateToken()
+                const data = await apiGenerateToken()
                 generatedToken.value = data.token
                 message.value = { type: 'success', text: 'Token generated successfully!' }
                 setTimeout(() => {
@@ -118,7 +122,7 @@ export default {
             if (!confirm(`Delete token: ${token}?`)) return
             
             try {
-                await deleteToken(token)
+                await apiDeleteToken(token)
                 message.value = { type: 'success', text: 'Token deleted successfully!' }
                 setTimeout(() => {
                     message.value = { type: '', text: '' }

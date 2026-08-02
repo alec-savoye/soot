@@ -1,12 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import distinct
-from typing import List
-from datetime import datetime
+from typing import List, Optional
+
+from database import get_db, Submission
 
 router = APIRouter()
-
-from database import SessionLocal, Submission
 
 class SubmissionRequest(BaseModel):
     token: str
@@ -17,16 +16,16 @@ class SubmissionRequest(BaseModel):
 class SubmissionResponse(BaseModel):
     success: bool
     message: str
-    token: str
-    data: dict
+    token: Optional[str] = None
+    data: Optional[dict] = None
 
 class SubmissionsResponse(BaseModel):
     success: bool
     count: int
-    data: List[Submission]
+    data: List[dict]
 
 @router.post("/submission")
-async def create_submission(request: SubmissionRequest, db: Session = Depends(SessionLocal)):
+async def create_submission(request: SubmissionRequest, db: Session = Depends(get_db)):
     """
     Submit a location and vibe score.
     Rate limited to 5 submissions per minute per token.
@@ -66,7 +65,7 @@ async def create_submission(request: SubmissionRequest, db: Session = Depends(Se
     )
 
 @router.get("/submissions")
-async def get_submissions(db: Session = Depends(SessionLocal)):
+async def get_submissions(db: Session = Depends(get_db)):
     """Get all submissions for the map"""
     submissions = db.query(Submission).order_by(Submission.created_at.desc()).all()
     
@@ -84,7 +83,7 @@ async def get_submissions(db: Session = Depends(SessionLocal)):
     )
 
 @router.get("/tokens")
-async def get_all_tokens(db: Session = Depends(SessionLocal)):
+async def get_all_tokens(db: Session = Depends(get_db)):
     """Admin endpoint to get all tokens"""
     tokens = db.query(Submission.client_token).distinct().all()
     token_list = [t.client_token for t in tokens]

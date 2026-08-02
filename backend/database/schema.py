@@ -1,9 +1,7 @@
 from sqlalchemy import Column, Integer, String, Numeric, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from database import Base
 
-Base = declarative_base()
 
 class Submission(Base):
     __tablename__ = "submissions"
