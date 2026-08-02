@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount frontend build output - allows hot reload during development
+      - ./frontend/dist:/app/frontend/dist
+      # Mount data directory for backend data access
+      - ./backend/data:/data
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount PostgreSQL data directory for persistence (bind mount, not Docker volume)
+      - ./backend/data:/app/backend/data
+      # Mount backend source code - allows hot reload during development
+      - ./backend:/app/backend
+    environment:
+      - DATABASE_URL=sqlite:////app/backend/data/heat_map.db
+
+# No named volumes - all data is in bind-mounted directories
