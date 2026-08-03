@@ -17,5 +17,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # SQLite DB persisted here (path hardcoded in backend/database/__init__.py)
       - ./data:/app/backend/data
+    environment:
+      ADMIN_PASSWORD: "super_secret_admin_pass_2026"

@@ -27,3 +27,5 @@ htmlcov/
 *~
 .env.production
 .Dockerfile
+
+# DO NOT COMMIT .env - it contains ADMIN_PASSWORD
